@@ -40,4 +40,9 @@ public class TaskService {
     public List<Task> filterByStatus(boolean completed) {
         return repository.findByCompleted(completed);
     }
+
+    @Transactional
+    public void delete(Long id) {
+        repository.delete(findById(id));
+    }
 }

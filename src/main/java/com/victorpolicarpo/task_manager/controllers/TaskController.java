@@ -38,4 +38,10 @@ public class TaskController {
     public ResponseEntity<List<Task>> filterByStatus(@RequestParam boolean completed){
         return ResponseEntity.ok(taskService.filterByStatus(completed));
     }
+
+    @DeleteMapping("/{id}/delete")
+    public ResponseEntity<Void> delete(@PathVariable Long id){
+        taskService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
 }
