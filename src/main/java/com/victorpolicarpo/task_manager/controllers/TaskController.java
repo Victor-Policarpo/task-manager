@@ -2,12 +2,10 @@ package com.victorpolicarpo.task_manager.controllers;
 
 import com.victorpolicarpo.task_manager.model.Task;
 import com.victorpolicarpo.task_manager.service.TaskService;
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
@@ -28,13 +26,12 @@ public class TaskController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Task> findById(@PathVariable Long id){
-        return new ResponseEntity<>(taskService.findById(id), HttpStatus.OK);
+        return ResponseEntity.ok(taskService.findById(id));
     }
 
     @PatchMapping("/{id}/complete")
     public ResponseEntity<Task> taskCompleted(@PathVariable Long id){
-        taskService.taskCompleted(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(taskService.taskCompleted(id));
     }
 
 }
