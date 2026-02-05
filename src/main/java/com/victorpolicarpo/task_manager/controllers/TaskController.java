@@ -13,17 +13,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TaskController {
     private final TaskService taskService;
-
     @GetMapping
     public ResponseEntity<List<Task>> listAll(){
         return ResponseEntity.ok(taskService.listAll());
     }
-
     @PostMapping("/create-task")
     public ResponseEntity<Task> createTask(@RequestBody Task task){
         return new ResponseEntity<>(taskService.createTask(task), HttpStatus.CREATED);
     }
-
     @GetMapping("/{id}")
     public ResponseEntity<Task> findById(@PathVariable Long id){
         return ResponseEntity.ok(taskService.findById(id));
