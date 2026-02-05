@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.net.URI;
 import java.util.List;
 
 @Service
@@ -30,5 +31,11 @@ public class TaskService {
                         () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Task Id not found our not exist")
         );
 
+    }
+    @Transactional
+    public Task taskCompleted(Long id) {
+        Task task = findById(id);
+        task.setCompleted(true);
+        return repository.save(task);
     }
 }
