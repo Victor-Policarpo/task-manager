@@ -26,5 +26,9 @@ public class TaskController {
         return new ResponseEntity<>(taskService.createTask(task), HttpStatus.CREATED);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Task> findById(@PathVariable Long id){
+        return new ResponseEntity<>(taskService.findById(id), HttpStatus.OK);
+    }
 
 }
