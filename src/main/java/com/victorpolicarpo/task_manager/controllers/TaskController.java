@@ -16,7 +16,7 @@ public class TaskController {
 
     @GetMapping
     public ResponseEntity<List<Task>> listAll(){
-        return new ResponseEntity<>(taskService.listAll(), HttpStatus.OK);
+        return ResponseEntity.ok(taskService.listAll());
     }
 
     @PostMapping("/create-task")
@@ -34,4 +34,8 @@ public class TaskController {
         return ResponseEntity.ok(taskService.taskCompleted(id));
     }
 
+    @GetMapping("/filter")
+    public ResponseEntity<List<Task>> filterByStatus(@RequestParam boolean completed){
+        return ResponseEntity.ok(taskService.filterByStatus(completed));
+    }
 }

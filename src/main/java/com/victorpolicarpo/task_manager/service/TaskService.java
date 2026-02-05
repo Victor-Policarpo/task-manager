@@ -36,4 +36,8 @@ public class TaskService {
         task.setCompleted(true);
         return repository.save(task);
     }
+
+    public List<Task> filterByStatus(boolean completed) {
+        return repository.findByCompleted(completed);
+    }
 }
