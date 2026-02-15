@@ -1,5 +1,7 @@
 package com.victorpolicarpo.task_manager.controllers;
 
+import com.victorpolicarpo.task_manager.dto.TaskRequestDto;
+import com.victorpolicarpo.task_manager.dto.TaskResponseDto;
 import com.victorpolicarpo.task_manager.model.Task;
 import com.victorpolicarpo.task_manager.service.TaskService;
 import lombok.RequiredArgsConstructor;
@@ -14,12 +16,13 @@ import java.util.List;
 public class TaskController {
     private final TaskService taskService;
     @GetMapping
-    public ResponseEntity<List<Task>> listAll(){
+    public ResponseEntity<List<TaskResponseDto>> listAll(){
         return ResponseEntity.ok(taskService.listAll());
     }
+
     @PostMapping("/create-task")
-    public ResponseEntity<Task> createTask(@RequestBody Task task){
-        return new ResponseEntity<>(taskService.createTask(task), HttpStatus.CREATED);
+    public ResponseEntity<TaskResponseDto> createTask(@RequestBody TaskRequestDto taskRequestDto){
+        return new ResponseEntity<>(taskService.createTask(taskRequestDto), HttpStatus.CREATED);
     }
     @GetMapping("/{id}")
     public ResponseEntity<Task> findById(@PathVariable Long id){
