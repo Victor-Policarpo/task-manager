@@ -1,5 +1,8 @@
 package com.victorpolicarpo.task_manager.service;
 
+import com.victorpolicarpo.task_manager.dto.TaskRequestDto;
+import com.victorpolicarpo.task_manager.dto.TaskResponseDto;
+import com.victorpolicarpo.task_manager.mapper.TaskMapper;
 import com.victorpolicarpo.task_manager.model.Task;
 import com.victorpolicarpo.task_manager.repository.TaskRepository;
 import jakarta.transaction.Transactional;
@@ -14,16 +17,22 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TaskService {
     public final TaskRepository repository;
+    public final TaskMapper taskMapper;
 
     @Transactional
-    public Task createTask(Task task) {
-        return repository.save(task);
+    public TaskResponseDto createTask(TaskRequestDto taskRequestDto) {
+        Task task = taskMapper.toEntity(taskRequestDto);
+        Task taskSaved = repository.save(task);
+        return taskMapper.toResponseDto(taskSaved);
     }
 
-    public List<Task> listAll() {
-       return repository.findAll(Sort.by("id").ascending());
+    @Transactional
+    public List<TaskResponseDto> listAll() {
+        List<Task> taskList = repository.findAll(Sort.by("id").ascending());
+       return taskMapper.toResponseDtoList(taskList);
     }
 
+    @Transactional
     public Task findById(Long id) {
         return repository.findById(id).
                 orElseThrow(
