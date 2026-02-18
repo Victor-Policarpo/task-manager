@@ -23,15 +23,15 @@ API REST para gerenciamento de tarefas desenvolvida com Spring Boot.
 
 
 ## Endpoints
-| Método | Endpoint      | Descrição                    |
-|------|-----------------|------------------------------|
-| GET  | /task           | Listar todas as tarefas      |
-| GET  | /task/{id}      | Buscar tarefa por ID         |
-| GET  | /task/filter?complete=true    | Listar tarefas com o filtro de status|
-| POST |/task/create-task| Criar uma nova tarefa        |
-| PATCH| /task/{id}/complete| Atualizar o status de uma tarefa|
-| PATCH| /task/{id}/update| Atualizar title/content de uma tarefa|
-| DELETE | /task/{id}    | Deletar uma tarefa|
+| Método | Endpoint | Funcionalidade |
+| --- | --- | --- |
+| GET | /tasks | List all task |
+| GET | /tasks/{id} | Find task by Id |
+| GET | /tasks/search | Filter tasks by status complete |
+| POST | /tasks | Create tasks |
+| PATCH | /tasks/{id} | Update tasks |
+| PATCH | /tasks/{id}/complete | Complete Tasks |
+| DELETE | /tasks/{id} | Delete Tasks |
 
 
 
