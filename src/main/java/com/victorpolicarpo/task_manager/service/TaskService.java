@@ -3,6 +3,7 @@ package com.victorpolicarpo.task_manager.service;
 import com.victorpolicarpo.task_manager.dto.TaskRequestDto;
 import com.victorpolicarpo.task_manager.dto.TaskResponseDto;
 import com.victorpolicarpo.task_manager.dto.TaskUpdateDto;
+import com.victorpolicarpo.task_manager.exception.ResourceNotFoundException;
 import com.victorpolicarpo.task_manager.mapper.TaskMapper;
 import com.victorpolicarpo.task_manager.model.Task;
 import com.victorpolicarpo.task_manager.repository.TaskRepository;
@@ -69,7 +70,7 @@ public class TaskService {
     public Task findEntityById(Long id) {
         return repository.findById(id).
                 orElseThrow(
-                        () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Task Id not found our not exist")
+                        () -> new ResourceNotFoundException("Task Id not found or not exist")
                 );
     }
 
