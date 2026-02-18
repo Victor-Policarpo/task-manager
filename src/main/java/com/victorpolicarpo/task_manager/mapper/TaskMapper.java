@@ -13,7 +13,7 @@ import java.util.List;
 public interface TaskMapper {
     Task toEntity(TaskRequestDto taskRequestDto);
     TaskResponseDto toResponseDto(Task entity);
-    //void updateEntityFromDto(TaskUpdateDto taskUpdateDto, @MappingTarget Task entity);
+    void updateEntityFromDto(TaskUpdateDto taskUpdateDto, @MappingTarget Task entity);
     List<TaskResponseDto> toResponseDtoList(List<Task> entity);
 
 }

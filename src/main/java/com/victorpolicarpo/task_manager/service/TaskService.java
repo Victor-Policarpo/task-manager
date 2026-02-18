@@ -2,6 +2,7 @@ package com.victorpolicarpo.task_manager.service;
 
 import com.victorpolicarpo.task_manager.dto.TaskRequestDto;
 import com.victorpolicarpo.task_manager.dto.TaskResponseDto;
+import com.victorpolicarpo.task_manager.dto.TaskUpdateDto;
 import com.victorpolicarpo.task_manager.mapper.TaskMapper;
 import com.victorpolicarpo.task_manager.model.Task;
 import com.victorpolicarpo.task_manager.repository.TaskRepository;
@@ -26,45 +27,50 @@ public class TaskService {
         return taskMapper.toResponseDto(taskSaved);
     }
 
-    @Transactional
+
     public List<TaskResponseDto> listAll() {
         List<Task> taskList = repository.findAll(Sort.by("id").ascending());
        return taskMapper.toResponseDtoList(taskList);
     }
 
-    @Transactional
-    public Task findById(Long id) {
-        return repository.findById(id).
-                orElseThrow(
-                        () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Task Id not found our not exist")
-        );
+
+    public TaskResponseDto findById(Long id) {
+        Task task = findEntityById(id);
+        return taskMapper.toResponseDto(task);
+
     }
 
     @Transactional
-    public Task taskCompleted(Long id) {
-        Task task = findById(id);
+    public TaskResponseDto taskCompleted(Long id) {
+        Task task = findEntityById(id);
         task.setCompleted(true);
-        return repository.save(task);
+        Task taskSaved = repository.save(task);
+        return taskMapper.toResponseDto(taskSaved);
     }
 
-    public List<Task> filterByStatus(boolean completed) {
-        return repository.findByCompleted(completed);
+    public List<TaskResponseDto> filterByStatus(boolean completed) {
+        List<Task> tasks = repository.findByCompleted(completed);
+        return taskMapper.toResponseDtoList(tasks);
     }
 
     @Transactional
     public void delete(Long id) {
-        repository.delete(findById(id));
+        repository.delete(findEntityById(id));
     }
 
     @Transactional
-    public Task update(Long id, Task updatedTask) {
-        Task task = findById(id);
-        if (updatedTask.getTitle() != null) {
-            task.setTitle(updatedTask.getTitle());
-        }
-        if (updatedTask.getContent() != null) {
-            task.setContent(updatedTask.getContent());
-        }
-        return repository.save(task);
+    public TaskResponseDto update(Long id, TaskUpdateDto taskUpdateDto) {
+        Task task = findEntityById(id);
+        taskMapper.updateEntityFromDto(taskUpdateDto, task);
+        Task taskSaved = repository.save(task);
+        return taskMapper.toResponseDto(taskSaved);
     }
+
+    public Task findEntityById(Long id) {
+        return repository.findById(id).
+                orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Task Id not found our not exist")
+                );
+    }
+
 }
