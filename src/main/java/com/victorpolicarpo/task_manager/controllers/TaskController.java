@@ -3,12 +3,13 @@ package com.victorpolicarpo.task_manager.controllers;
 import com.victorpolicarpo.task_manager.dto.TaskRequestDto;
 import com.victorpolicarpo.task_manager.dto.TaskResponseDto;
 import com.victorpolicarpo.task_manager.dto.TaskUpdateDto;
-import com.victorpolicarpo.task_manager.model.Task;
 import com.victorpolicarpo.task_manager.service.TaskService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -22,7 +23,7 @@ public class TaskController {
     }
 
     @PostMapping
-    public ResponseEntity<TaskResponseDto> createTask(@RequestBody TaskRequestDto taskRequestDto){
+    public ResponseEntity<TaskResponseDto> createTask(@Valid @RequestBody TaskRequestDto taskRequestDto){
         return new ResponseEntity<>(taskService.createTask(taskRequestDto), HttpStatus.CREATED);
     }
     @GetMapping("/{id}")
@@ -47,7 +48,7 @@ public class TaskController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<TaskResponseDto> update(@PathVariable Long id, @RequestBody TaskUpdateDto taskUpdateDto){
+    public ResponseEntity<TaskResponseDto> update(@PathVariable Long id,@Valid @RequestBody TaskUpdateDto taskUpdateDto){
         return ResponseEntity.ok(taskService.update(id, taskUpdateDto));
     }
 }
