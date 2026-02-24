@@ -1,4 +1,4 @@
-package com.victorpolicarpo.task_manager.dto;
+package com.victorpolicarpo.task_manager.dto.task;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
