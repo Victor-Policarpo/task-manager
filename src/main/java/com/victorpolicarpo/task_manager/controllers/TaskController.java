@@ -1,8 +1,8 @@
 package com.victorpolicarpo.task_manager.controllers;
 
-import com.victorpolicarpo.task_manager.dto.TaskRequestDto;
-import com.victorpolicarpo.task_manager.dto.TaskResponseDto;
-import com.victorpolicarpo.task_manager.dto.TaskUpdateDto;
+import com.victorpolicarpo.task_manager.dto.task.TaskRequestDto;
+import com.victorpolicarpo.task_manager.dto.task.TaskResponseDto;
+import com.victorpolicarpo.task_manager.dto.task.TaskUpdateDto;
 import com.victorpolicarpo.task_manager.service.TaskService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

@@ -1,29 +1,32 @@
 package com.victorpolicarpo.task_manager.service;
 
-import com.victorpolicarpo.task_manager.dto.TaskRequestDto;
-import com.victorpolicarpo.task_manager.dto.TaskResponseDto;
-import com.victorpolicarpo.task_manager.dto.TaskUpdateDto;
+import com.victorpolicarpo.task_manager.dto.task.TaskRequestDto;
+import com.victorpolicarpo.task_manager.dto.task.TaskResponseDto;
+import com.victorpolicarpo.task_manager.dto.task.TaskUpdateDto;
 import com.victorpolicarpo.task_manager.exception.ResourceNotFoundException;
 import com.victorpolicarpo.task_manager.mapper.TaskMapper;
 import com.victorpolicarpo.task_manager.model.Task;
+import com.victorpolicarpo.task_manager.model.User;
 import com.victorpolicarpo.task_manager.repository.TaskRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
+
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class TaskService {
-    public final TaskRepository repository;
-    public final TaskMapper taskMapper;
+    private final TaskRepository repository;
+    private final TaskMapper taskMapper;
+    private final UserService userService;
 
     @Transactional
     public TaskResponseDto createTask(TaskRequestDto taskRequestDto) {
+        User user = userService.findEntityById(taskRequestDto.getUser_id());
         Task task = taskMapper.toEntity(taskRequestDto);
+        task.setUser(user);
         Task taskSaved = repository.save(task);
         return taskMapper.toResponseDto(taskSaved);
     }
