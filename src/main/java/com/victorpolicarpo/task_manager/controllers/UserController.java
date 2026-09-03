@@ -1,12 +1,10 @@
 package com.victorpolicarpo.task_manager.controllers;
 
-import com.victorpolicarpo.task_manager.dto.user.UserRequestDto;
 import com.victorpolicarpo.task_manager.dto.user.UserResponseDto;
 import com.victorpolicarpo.task_manager.dto.user.UserUpdateDto;
 import com.victorpolicarpo.task_manager.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,11 +15,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
-
-    @PostMapping
-    public ResponseEntity<UserResponseDto> createUser(@Valid @RequestBody UserRequestDto userRequestDto){
-        return new ResponseEntity<>(userService.createUser(userRequestDto), HttpStatus.CREATED);
-    }
 
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDto> findById(@PathVariable Long id){
