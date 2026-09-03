@@ -8,6 +8,7 @@ import com.victorpolicarpo.task_manager.dto.user.UserUpdateDto;
 import com.victorpolicarpo.task_manager.model.Task;
 import com.victorpolicarpo.task_manager.model.User;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
@@ -15,6 +16,8 @@ import java.util.List;
 
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE, uses = {TaskMapper.class})
 public interface UserMapper {
+    @Mapping(target = "passwordHash", source = "password")
+    @Mapping(target = "role", ignore = true)
     User toEntity(UserRequestDto userRequestDto);
     UserResponseDto toResponseDto(User entity);
     void updateEntityFromDto(UserUpdateDto userUpdateDto, @MappingTarget User entity);
