@@ -23,7 +23,7 @@ public class UserController {
         return new ResponseEntity<>(userService.createUser(userRequestDto), HttpStatus.CREATED);
     }
 
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<UserResponseDto> findById(@PathVariable Long id){
         return ResponseEntity.ok(userService.findById(id));
     }
@@ -33,7 +33,7 @@ public class UserController {
         return ResponseEntity.ok(userService.listAll());
     }
 
-    @PatchMapping("{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<UserResponseDto> update(@Valid @RequestBody UserUpdateDto userUpdateDto, @PathVariable Long id){
         return ResponseEntity.ok(userService.update(userUpdateDto, id));
     }

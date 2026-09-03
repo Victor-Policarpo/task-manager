@@ -19,6 +19,6 @@ public interface UserMapper {
     UserResponseDto toResponseDto(User entity);
     void updateEntityFromDto(UserUpdateDto userUpdateDto, @MappingTarget User entity);
     List<UserResponseDto> toResponseDtoList(List<User> entity);
-    TaskMinDto toUserMinDto(Task task);
+    TaskMinDto toTaskMinDto(Task task);
     TaskMinDto map(TaskResponseDto value);
 }
