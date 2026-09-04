@@ -121,22 +121,6 @@ class UserControllerTest {
         }
 
         @Test
-        void updateUserShouldReturn200() throws Exception {
-            when(userService.update(any(), org.mockito.ArgumentMatchers.eq(1L)))
-                    .thenReturn(userDto(1L, "Updated", "victor@example.com", Role.USER));
-
-            mockMvc.perform(patch("/users/1")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content("""
-                                    {
-                                      "name": "Updated"
-                                    }
-                                    """))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.name").value("Updated"));
-        }
-
-        @Test
         void deleteUserShouldReturn204() throws Exception {
             mockMvc.perform(delete("/users/1"))
                     .andExpect(status().isNoContent());

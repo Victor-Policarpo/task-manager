@@ -1,6 +1,6 @@
 package com.victorpolicarpo.task_manager.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import com.victorpolicarpo.task_manager.exception.StandardError;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

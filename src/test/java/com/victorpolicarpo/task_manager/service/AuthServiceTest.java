@@ -4,6 +4,7 @@ import com.victorpolicarpo.task_manager.dto.auth.AuthResponseDto;
 import com.victorpolicarpo.task_manager.dto.auth.LoginRequestDto;
 import com.victorpolicarpo.task_manager.dto.auth.RegisterRequestDto;
 import com.victorpolicarpo.task_manager.exception.ConflictException;
+import com.victorpolicarpo.task_manager.mapper.UserMapper;
 import com.victorpolicarpo.task_manager.model.Role;
 import com.victorpolicarpo.task_manager.model.User;
 import com.victorpolicarpo.task_manager.repository.UserRepository;
@@ -45,13 +46,16 @@ class AuthServiceTest {
     @Mock
     private JwtService jwtService;
 
+    @Mock
+    private UserMapper userMapper;
+
     private PasswordEncoder passwordEncoder;
     private AuthService authService;
 
     @BeforeEach
     void setUp() {
         passwordEncoder = new BCryptPasswordEncoder();
-        authService = new AuthService(userRepository, passwordEncoder, authenticationManager, jwtService);
+        authService = new AuthService(userRepository, passwordEncoder, authenticationManager, jwtService, userMapper);
     }
 
     @Test
@@ -59,6 +63,13 @@ class AuthServiceTest {
         RegisterRequestDto request = new RegisterRequestDto(
                 "Victor", 25, "  VICTOR@EXAMPLE.COM  ", "Secure1!"
         );
+        when(userMapper.toEntity(any(RegisterRequestDto.class))).thenAnswer(invocation -> {
+            RegisterRequestDto dto = invocation.getArgument(0);
+            User user = new User();
+            user.setName(dto.getName());
+            user.setAge(dto.getAge());
+            return user;
+        });
         when(userRepository.existsByEmail("victor@example.com")).thenReturn(false);
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
             User user = invocation.getArgument(0);

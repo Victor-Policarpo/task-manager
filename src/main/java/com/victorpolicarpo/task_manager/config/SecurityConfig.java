@@ -1,6 +1,6 @@
 package com.victorpolicarpo.task_manager.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import com.victorpolicarpo.task_manager.exception.StandardError;
 import com.victorpolicarpo.task_manager.security.JwtAuthenticationFilter;
 import com.victorpolicarpo.task_manager.security.JwtProperties;

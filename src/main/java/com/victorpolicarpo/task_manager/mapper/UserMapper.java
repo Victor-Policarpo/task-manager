@@ -8,6 +8,7 @@ import com.victorpolicarpo.task_manager.model.Task;
 import com.victorpolicarpo.task_manager.model.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
 import java.util.List;
@@ -20,5 +21,5 @@ public interface UserMapper {
     UserResponseDto toResponseDto(User entity);
     List<UserResponseDto> toResponseDtoList(List<User> entity);
     TaskMinDto toTaskMinDto(Task task);
-    void toUpdateUser(UserUpdateDto userUpdateDto, User user);
+    void toUpdateUser(UserUpdateDto userUpdateDto, @MappingTarget User user);
 }
