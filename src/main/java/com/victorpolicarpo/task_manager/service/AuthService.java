@@ -4,6 +4,7 @@ import com.victorpolicarpo.task_manager.dto.auth.AuthResponseDto;
 import com.victorpolicarpo.task_manager.dto.auth.LoginRequestDto;
 import com.victorpolicarpo.task_manager.dto.auth.RegisterRequestDto;
 import com.victorpolicarpo.task_manager.exception.ConflictException;
+import com.victorpolicarpo.task_manager.mapper.UserMapper;
 import com.victorpolicarpo.task_manager.model.Role;
 import com.victorpolicarpo.task_manager.model.User;
 import com.victorpolicarpo.task_manager.repository.UserRepository;
@@ -25,6 +26,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final UserMapper userMapper;
 
     @Transactional
     public AuthResponseDto register(RegisterRequestDto registerRequestDto) {
@@ -34,9 +36,8 @@ public class AuthService {
             throw new ConflictException("Email already registered.");
         }
 
-        User user = new User();
-        user.setName(registerRequestDto.getName());
-        user.setAge(registerRequestDto.getAge());
+        User user = userMapper.toEntity(registerRequestDto);
+
         user.setEmail(normalizedEmail);
         user.setPasswordHash(passwordEncoder.encode(registerRequestDto.getPassword()));
         user.setRole(Role.USER);

@@ -8,9 +8,9 @@ import com.victorpolicarpo.task_manager.mapper.TaskMapper;
 import com.victorpolicarpo.task_manager.model.Task;
 import com.victorpolicarpo.task_manager.model.User;
 import com.victorpolicarpo.task_manager.repository.TaskRepository;
+import com.victorpolicarpo.task_manager.security.AuthenticatedUser;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,61 +20,65 @@ import java.util.List;
 public class TaskService {
     private final TaskRepository repository;
     private final TaskMapper taskMapper;
-    private final UserService userService;
+    private final AuthenticatedUser authenticatedUser;
 
     @Transactional
-    public TaskResponseDto createTask(TaskRequestDto taskRequestDto) {
-        User user = userService.findEntityById(taskRequestDto.getUser_id());
-        Task task = taskMapper.toEntity(taskRequestDto);
+    public TaskResponseDto createTask(TaskRequestDto dto) {
+        User user = authenticatedUser.get();
+        Task task = new Task();
+        task.setTitle(dto.getTitle());
+        task.setContent(dto.getContent());
+        task.setCompleted(false);
         task.setUser(user);
-        Task taskSaved = repository.save(task);
-        return taskMapper.toResponseDto(taskSaved);
+        Task saved = repository.save(task);
+        return taskMapper.toResponseDto(saved);
     }
-
 
     public List<TaskResponseDto> listAll() {
-        List<Task> taskList = repository.findAll(Sort.by("id").ascending());
-       return taskMapper.toResponseDtoList(taskList);
+        Long userId = authenticatedUser.getId();
+        List<Task> tasks = repository.findAllByUserIdOrderByIdAsc(userId);
+        return taskMapper.toResponseDtoList(tasks);
     }
 
-
     public TaskResponseDto findById(Long id) {
-        Task task = findEntityById(id);
+        Long userId = authenticatedUser.getId();
+        Task task = findOwnedTask(id, userId);
         return taskMapper.toResponseDto(task);
-
     }
 
     @Transactional
     public TaskResponseDto taskCompleted(Long id) {
-        Task task = findEntityById(id);
+        Long userId = authenticatedUser.getId();
+        Task task = findOwnedTask(id, userId);
         task.setCompleted(true);
-        Task taskSaved = repository.save(task);
-        return taskMapper.toResponseDto(taskSaved);
+        Task saved = repository.save(task);
+        return taskMapper.toResponseDto(saved);
     }
 
     public List<TaskResponseDto> filterByStatus(boolean completed) {
-        List<Task> tasks = repository.findByCompleted(completed);
+        Long userId = authenticatedUser.getId();
+        List<Task> tasks = repository.findAllByUserIdAndCompletedOrderByIdAsc(userId, completed);
         return taskMapper.toResponseDtoList(tasks);
     }
 
     @Transactional
     public void delete(Long id) {
-        repository.delete(findEntityById(id));
+        Long userId = authenticatedUser.getId();
+        Task task = findOwnedTask(id, userId);
+        repository.delete(task);
     }
 
     @Transactional
-    public TaskResponseDto update(Long id, TaskUpdateDto taskUpdateDto) {
-        Task task = findEntityById(id);
-        taskMapper.updateEntityFromDto(taskUpdateDto, task);
-        Task taskSaved = repository.save(task);
-        return taskMapper.toResponseDto(taskSaved);
+    public TaskResponseDto update(Long id, TaskUpdateDto dto) {
+        Long userId = authenticatedUser.getId();
+        Task task = findOwnedTask(id, userId);
+        taskMapper.updateEntityFromDto(dto, task);
+        Task saved = repository.save(task);
+        return taskMapper.toResponseDto(saved);
     }
 
-    public Task findEntityById(Long id) {
-        return repository.findById(id).
-                orElseThrow(
-                        () -> new ResourceNotFoundException("Task Id not found or not exist")
-                );
+    private Task findOwnedTask(Long taskId, Long userId) {
+        return repository.findByIdAndUserId(taskId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
     }
-
 }

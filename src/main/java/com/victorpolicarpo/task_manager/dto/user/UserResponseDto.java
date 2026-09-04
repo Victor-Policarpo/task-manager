@@ -1,8 +1,8 @@
 package com.victorpolicarpo.task_manager.dto.user;
 
 import com.victorpolicarpo.task_manager.dto.task.TaskMinDto;
-import com.victorpolicarpo.task_manager.dto.task.TaskResponseDto;
-import com.victorpolicarpo.task_manager.model.Task;
+import com.victorpolicarpo.task_manager.model.Role;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,6 +19,7 @@ public class UserResponseDto {
     private String name;
     private Integer age;
     private String email;
+    private Role role;
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<TaskMinDto> tasks;
-
 }

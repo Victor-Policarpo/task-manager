@@ -3,6 +3,7 @@ package com.victorpolicarpo.task_manager.security;
 import com.victorpolicarpo.task_manager.model.User;
 import com.victorpolicarpo.task_manager.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -17,10 +18,10 @@ import java.util.Locale;
 public class CustomUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
 
+    @NullMarked
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        String normalizedEmail = email.trim().toLowerCase(Locale.ROOT);
-        User user = userRepository.findByEmail(normalizedEmail)
+        User user = userRepository.findByEmail(email.trim().toLowerCase(Locale.ROOT))
                 .orElseThrow(() -> new UsernameNotFoundException("Invalid credentials."));
 
         return org.springframework.security.core.userdetails.User.builder()
