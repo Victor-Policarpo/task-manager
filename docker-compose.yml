@@ -1,0 +1,41 @@
+services:
+  postgres:
+    image: postgres:18
+    container_name: taskmanager_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    expose:
+      - "5432"
+    networks:
+        - taskmanager_network
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: taskmanager_backend
+    restart: always
+    environment:
+      - DB_URL=${DB_URL}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRATION=${JWT_EXPIRATION}
+    expose:
+      - "8080"
+    depends_on:
+      - postgres
+    networks:
+      - taskmanager_network
+
+volumes:
+  postgres_data:
+
+networks:
+    taskmanager_network:
+      driver: bridge

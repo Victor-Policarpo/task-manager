@@ -14,10 +14,21 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class JwtServiceTest {
 
+    private User user(String email) {
+        User user = new User();
+        user.setId(1L);
+        user.setName("Victor");
+        user.setAge(25);
+        user.setEmail(email);
+        user.setPasswordHash("$2a$10$hash");
+        user.setRole(Role.USER);
+        return user;
+    }
+
     @Test
     void generateTokenShouldContainExpectedClaimsAndExpiration() {
         JwtService jwtService = jwtServiceWithExpiration(60_000);
-        User user = new User(1L, "Victor", 25, "victor@example.com", "$2a$10$hash", Role.USER, null);
+        User user = user("victor@example.com");
 
         String token = jwtService.generateToken(user);
 
@@ -31,7 +42,7 @@ class JwtServiceTest {
     @Test
     void expiredTokenShouldNotBeAccepted() {
         JwtService jwtService = jwtServiceWithExpiration(-1);
-        User user = new User(1L, "Victor", 25, "victor@example.com", "$2a$10$hash", Role.USER, null);
+        User user = user("victor@example.com");
 
         String expiredToken = jwtService.generateToken(user);
 

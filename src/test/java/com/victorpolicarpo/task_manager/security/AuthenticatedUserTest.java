@@ -29,9 +29,20 @@ class AuthenticatedUserTest {
         SecurityContextHolder.clearContext();
     }
 
+    private User user() {
+        User user = new User();
+        user.setId(1L);
+        user.setName("Victor");
+        user.setAge(25);
+        user.setEmail("victor@example.com");
+        user.setPasswordHash("hash");
+        user.setRole(Role.USER);
+        return user;
+    }
+
     @Test
     void getShouldReturnAuthenticatedUser() {
-        User user = new User(1L, "Victor", 25, "victor@example.com", "hash", Role.USER, null);
+        User user = user();
         when(userRepository.findByEmail("victor@example.com")).thenReturn(Optional.of(user));
 
         Authentication auth = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
@@ -47,7 +58,7 @@ class AuthenticatedUserTest {
 
     @Test
     void getIdShouldReturnAuthenticatedUserId() {
-        User user = new User(1L, "Victor", 25, "victor@example.com", "hash", Role.USER, null);
+        User user = user();
         when(userRepository.findByEmail("victor@example.com")).thenReturn(Optional.of(user));
 
         Authentication auth = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(

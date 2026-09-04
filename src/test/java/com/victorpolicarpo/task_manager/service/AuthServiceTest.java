@@ -109,7 +109,13 @@ class AuthServiceTest {
     @Test
     void loginShouldAuthenticateGenerateJwtAndNormalizeEmail() {
         LoginRequestDto request = new LoginRequestDto("  VICTOR@EXAMPLE.COM ", "Secure1!");
-        User user = new User(1L, "Victor", 25, "victor@example.com", "$2a$10$hash", Role.USER, null);
+        User user = new User();
+        user.setId(1L);
+        user.setName("Victor");
+        user.setAge(25);
+        user.setEmail("victor@example.com");
+        user.setPasswordHash("$2a$10$hash");
+        user.setRole(Role.USER);
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(new UsernamePasswordAuthenticationToken("victor@example.com", null));
         when(userRepository.findByEmail("victor@example.com")).thenReturn(java.util.Optional.of(user));
