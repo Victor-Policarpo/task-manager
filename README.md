@@ -45,7 +45,6 @@ API REST para gerenciamento de tarefas desenvolvida com Spring Boot, com autenti
 
 ![Maven](https://img.shields.io/badge/Maven-Build-C71A36?style=for-the-badge&logo=apachemaven&logoColor=white)
 
-![MapStruct](https://img.shields.io/badge/MapStruct-1.5.5-Final-336791?style=for-the-badge&logo=java&logoColor=white)
 
 ## Arquitetura
 
