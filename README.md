@@ -136,7 +136,7 @@ UserRepository / TaskRepository
 
 ## Como Rodar o Projeto
 
-### Pré-requisitos
+###  Prerequisites
 - Java 21
 - Maven
 - PostgreSQL
