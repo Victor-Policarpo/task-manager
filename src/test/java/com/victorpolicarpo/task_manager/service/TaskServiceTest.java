@@ -46,8 +46,19 @@ class TaskServiceTest {
     @BeforeEach
     void setUp() {
         taskService = new TaskService(repository, taskMapper, authenticatedUser);
-        userA = new User(1L, "User A", 25, "a@example.com", "hash", Role.USER, null);
-        userB = new User(2L, "User B", 30, "b@example.com", "hash", Role.USER, null);
+        userA = user(1L, "User A", "a@example.com");
+        userB = user(2L, "User B", "b@example.com");
+    }
+
+    private User user(Long id, String name, String email) {
+        User user = new User();
+        user.setId(id);
+        user.setName(name);
+        user.setAge(25);
+        user.setEmail(email);
+        user.setPasswordHash("hash");
+        user.setRole(Role.USER);
+        return user;
     }
 
     private Task ownedTask(Long id, String title, User owner) {
