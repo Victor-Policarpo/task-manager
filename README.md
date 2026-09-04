@@ -1,33 +1,43 @@
 # TaskManagerAPI
 
-RESTful API for task and user management built with Spring Boot, providing a simple and efficient way to create, organize, and track tasks associated with users.
+API REST para gerenciamento de tarefas desenvolvida com Spring Boot, com autenticação JWT, autorização por roles (USER/ADMIN) e isolamento de dados por proprietário.
 
-## Features
+## Funcionalidades
 
-###  Users
+### Autenticação e Autorização
+- Registro de usuários (`POST /auth/register`)
+- Login com geração de JWT (`POST /auth/login`)
+- Autenticação stateless via Bearer token
+- Roles: `USER` e `ADMIN`
 
-* Create new users
-* Retrieve all users stored in the database
-* Fetch a specific user by ID
-* Update user information
-* Delete users and their related tasks
+### Tasks (proprietário autenticado)
+- Criar tarefa (proprietário definido automaticamente pelo JWT)
+- Listar tarefas do usuário autenticado
+- Buscar tarefa por ID (somente próprias)
+- Filtrar tarefas por status (somente próprias)
+- Atualizar tarefa (somente próprias)
+- Concluir tarefa (somente próprias)
+- Excluir tarefa (somente próprias)
 
-###  Tasks
+### Perfil do Usuário (`/users/me`)
+- Consultar próprio perfil (`GET /users/me`)
+- Atualizar nome, idade e email (`PATCH /users/me`)
+- Normalização de email (trim + lowercase)
+- Verificação de duplicidade no email
 
-* Create new tasks linked to users
-* Retrieve all tasks stored in the database
-* Fetch a specific task by ID
-* Filter tasks by completion status (completed or pending)
-* Mark tasks as completed or update their completion status
-* Update existing task details
-* Delete tasks
+### Administração (exclusivo ADMIN)
+- Listar todos os usuários
+- Consultar usuário por ID
+- Atualizar usuário por ID
+- Excluir usuário por ID
 
+## Tecnologias
 
-
-## Technologies
 ![Java](https://img.shields.io/badge/Java-21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
 
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.2-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)
+
+![Spring Security](https://img.shields.io/badge/Spring%20Security-6DB33F?style=for-the-badge&logo=springsecurity&logoColor=white)
 
 ![Spring Data JPA](https://img.shields.io/badge/Spring%20Data%20JPA-JPA-6DB33F?style=for-the-badge&logo=spring&logoColor=white)
 
@@ -35,116 +45,168 @@ RESTful API for task and user management built with Spring Boot, providing a sim
 
 ![Maven](https://img.shields.io/badge/Maven-Build-C71A36?style=for-the-badge&logo=apachemaven&logoColor=white)
 
+![MapStruct](https://img.shields.io/badge/MapStruct-1.5.5-Final-336791?style=for-the-badge&logo=java&logoColor=white)
 
-## Users endpoints
+## Arquitetura
 
-| Method | Endpoint | Description |
-|-------|----------|------------|
-| GET | /users | List all users |
-| GET | /users/{id} | Get user by ID |
-| POST | /users | Create user |
-| PATCH | /users/{id} | Update user |
-| DELETE | /users/{id} | Delete user and related tasks |
-
-## Tasks endpoints
-
-| Method | Endpoint | Description |
-|-------|----------|------------|
-| GET | /tasks | List all tasks |
-| GET | /tasks/{id} | Get task by ID |
-| GET | /tasks/search | Filter tasks by completion status |
-| POST | /tasks | Create task |
-| PATCH | /tasks/{id} | Update task |
-| PATCH | /tasks/{id}/complete | Mark task as completed |
-| DELETE | /tasks/{id} | Delete task |
-
-
-## How use endpoints with body parameters
-###  Create user 
-
-- **POST /users**
-
-```json
-{
-  "name": "NameOfUser",
-  "age": 20,
-  "email": "yourEmail@gmail.com",
-  "password": "@andNumbers123"
-}
+```
+HTTP Request
+      |
+JwtAuthenticationFilter   ← valida Bearer token, popula SecurityContext
+      |
+SecurityFilterChain        ← CSRF off, STATELESS, Authorization por role
+      |
++-----+-----+-----+
+|           |           |
+/auth/*    /tasks/*    /users/*
+(public)  (auth'd)    (auth'd / admin)
+|           |           |
+AuthCtrl   TaskCtrl   UserCtrl
+|           |           |
+AuthService TaskService UserService
+|           |           |
+           AuthenticatedUser  ← componente central de identificação
+      |
+UserRepository / TaskRepository
+      |
+  PostgreSQL
 ```
 
-⚠️ password is stored without hash (temporary until Spring Security implementation)
+**Ownership:** As Tasks são isoladas por proprietário. O usuário autenticado no JWT é automaticamente o dono de suas Tasks. O cliente nunca informa o proprietário.
 
-###  Create Tasks
-- **POST /tasks**
+## Endpoints
 
-```json
-{
-  "title": "Example title",
-  "content": "Example description",
-  "userId": 1
-}
-```
+### Autenticação (público)
 
-### Update Users 
+| Método | Endpoint          | Descrição                        |
+|--------|-------------------|----------------------------------|
+| POST   | `/auth/register`  | Registrar novo usuário           |
+| POST   | `/auth/login`     | Login e obter JWT                |
 
-- **PATCH /users/{id}**
-```json
-{
-  "name": "NameOfUser",     // optional
-  "age": 20,                  // optional
-  "email": "yourEmail@gmail.com" // optional
-}
-```
+### Tasks (autenticado — somente próprias)
 
-### Update Tasks
+| Método | Endpoint              | Descrição                          |
+|--------|-----------------------|------------------------------------|
+| GET    | `/tasks`              | Listar tarefas do usuário          |
+| POST   | `/tasks`              | Criar nova tarefa                  |
+| GET    | `/tasks/{id}`         | Buscar tarefa por ID               |
+| PATCH  | `/tasks/{id}`         | Atualizar title/content            |
+| PATCH  | `/tasks/{id}/complete`| Marcar tarefa como concluída       |
+| GET    | `/tasks/search?completed=true`| Filtrar por status          |
+| DELETE | `/tasks/{id}`         | Excluir tarefa                     |
 
-- **PATCH /tasks/{id}**
-```json
-{
-  "title": "Example title",       // optional
-  "content": "Example description" // optional
-}
-```
-Only provided fields are updated
+### Perfil (autenticado)
 
-##  How to run the project
+| Método | Endpoint    | Descrição                          |
+|--------|-------------|------------------------------------|
+| GET    | `/users/me` | Consultar perfil do usuário        |
+| PATCH  | `/users/me` | Atualizar nome, idade ou email     |
+
+### Administração (exclusivo ADMIN)
+
+| Método | Endpoint        | Descrição                          |
+|--------|-----------------|------------------------------------|
+| GET    | `/users`        | Listar todos os usuários           |
+| GET    | `/users/{id}`   | Consultar usuário por ID           |
+| PATCH  | `/users/{id}`   | Atualizar usuário por ID           |
+| DELETE | `/users/{id}`   | Excluir usuário por ID             |
+
+## Regras de Autorização
+
+| Endpoint               | USER | ADMIN |
+|------------------------|------|-------|
+| `/auth/**`             | ✅ público | ✅ público |
+| `/tasks/**` (próprias) | ✅ | ✅ (só as suas) |
+| `GET /users/me`        | ✅ | ✅ |
+| `PATCH /users/me`      | ✅ | ✅ |
+| `GET /users`           | ❌ 403 | ✅ |
+| `GET /users/{id}`      | ❌ 403 | ✅ |
+| `PATCH /users/{id}`    | ❌ 403 | ✅ |
+| `DELETE /users/{id}`   | ❌ 403 | ✅ |
+
+## Respostas de Erro
+
+| HTTP Status | Quando                                |
+|-------------|---------------------------------------|
+| 400         | Validação de dados falhou             |
+| 401         | JWT ausente, inválido ou expirado     |
+| 403         | Usuário autenticado sem role necessária |
+| 404         | Recurso não encontrado (ou pertence a outro usuário) |
+| 409         | Email duplicado ou violação de integridade |
+
+## Como Rodar o Projeto
 
 ###  Prerequisites
 - Java 21
 - Maven
 - PostgreSQL
-### 1. Clone the repository
+
+### 1. Clonar o repositório
 ```bash
 git clone https://github.com/Victor-Policarpo/task-manager.git
 cd task-manager
 ```
-### 2. Configure environment variables
-Configure the environment variables according to the file `.env.example`:
-  ```
+
+### 2. Configurar variáveis de ambiente
+Copie o `.env.example` e configure:
+```
 DB_URL=jdbc:postgresql://localhost:5432/your_database
 DB_USER=your_postgres_user
 DB_PASSWORD=your_password_here
+JWT_SECRET=REPLACE_WITH_A_BASE64_ENCODED_32_BYTE_OR_LONGER_SECRET
+JWT_EXPIRATION=3600000
 ```
-### 3. Create the database
-PostgreSQL, create database:
 
-```CREATE DATABASE your_database;```
+### 3. Criar o banco de dados
+```sql
+CREATE DATABASE your_database;
+```
 
-### 4. Run the application
-Execute commands:
+### 4. Executar a aplicação
+```bash
+mvn spring-boot:run
+```
 
-```mvn spring-boot:run```
+A aplicação estará disponível em `http://localhost:8080`.
 
-The application will be available at:
+## Testes
 
-```http://localhost:8080```
-##  Author
+```bash
+mvn test
+```
+
+O projeto possui 51 testes cobrindo:
+- **Auth:** registro, login, normalização de email, hash de senha BCrypt
+- **JWT:** geração de token, validade, expiração, filtro de autenticação
+- **Ownership:** isolamento de Tasks por usuário, criação automática de proprietário, rejeição de `user_id` do cliente
+- **Usuários:** perfil (`/users/me`), proteção de `passwordHash`
+- **Admin:** endpoints administrativos e autorização por role
+- **Segurança:** `401` sem JWT, `403` sem role necessária, `404` para recursos de outros usuários
+
+## Estrutura do Projeto
+
+```
+src/main/java/com/victorpolicarpo/task_manager/
+├── config/              # SecurityConfig, PasswordEncoderConfig
+├── controllers/         # AuthController, TaskController, UserController
+├── dto/
+│   ├── auth/            # RegisterRequestDto, LoginRequestDto, AuthResponseDto
+│   ├── task/            # TaskRequestDto, TaskUpdateDto, TaskResponseDto, TaskMinDto
+│   └── user/            # UserRequestDto, UserUpdateDto, UserResponseDto, UserMinDto
+├── exception/           # GlobalExceptionHandler, ResourceNotFoundException, ConflictException
+├── mapper/              # TaskMapper, UserMapper (MapStruct)
+├── model/               # User, Task, Role
+├── repository/          # UserRepository, TaskRepository
+├── security/            # JwtService, JwtAuthenticationFilter, AuthenticatedUser, CustomUserDetailsService
+└── service/             # AuthService, TaskService, UserService
+```
+
+## Autor
 
 Victor Policarpo
 - GitHub: [Victor-Policarpo](https://github.com/Victor-Policarpo)
 - LinkedIn: [VictorPolicarpo](https://www.linkedin.com/in/victor-policarpo-dev/)
 
-##  Licença
+## Licença
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
+Este projeto está licenciado sob a licença MIT. Consulte o arquivo [LICENSE](LICENSE).
