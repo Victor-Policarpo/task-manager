@@ -1,6 +1,5 @@
 package com.victorpolicarpo.task_manager.config;
 
-import tools.jackson.databind.ObjectMapper;
 import com.victorpolicarpo.task_manager.exception.StandardError;
 import com.victorpolicarpo.task_manager.security.JwtAuthenticationFilter;
 import com.victorpolicarpo.task_manager.security.JwtProperties;
@@ -23,6 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import tools.jackson.databind.ObjectMapper;
 
 import java.time.Instant;
 import java.util.Objects;
@@ -47,7 +47,13 @@ public class SecurityConfig {
                 )
                 .authenticationProvider(authenticationProvider)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/auth/register", "/auth/login").permitAll()
+                        .requestMatchers(
+                                "/auth/register",
+                                "/auth/login",
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html"
+                        ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/users/me").authenticated()
                         .requestMatchers(HttpMethod.PATCH, "/users/me").authenticated()
                         .requestMatchers("/users/{id}").hasRole("ADMIN")
