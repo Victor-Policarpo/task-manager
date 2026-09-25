@@ -1,5 +1,6 @@
 package com.victorpolicarpo.task_manager.mapper;
 
+import com.victorpolicarpo.task_manager.dto.task.TaskResponseDto;
 import com.victorpolicarpo.task_manager.dto.taskImage.TaskImageResponseDto;
 import com.victorpolicarpo.task_manager.model.Task;
 import com.victorpolicarpo.task_manager.model.TaskImage;
@@ -7,6 +8,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface TaskImageMapper {
@@ -21,4 +24,6 @@ public interface TaskImageMapper {
     @Mapping(target = "originalFileName", source = "originalFilename")
     @Mapping(target = "url", ignore = true)
     TaskImageResponseDto toResponseDto(TaskImage entity);
+
+    List<TaskImageResponseDto> toResponseDtoList(List<TaskImage> entities);
 }

@@ -21,29 +21,25 @@ public class TaskService {
     private final TaskRepository repository;
     private final TaskMapper taskMapper;
     private final AuthenticatedUser authenticatedUser;
+    private final TaskImageService taskImageService;
 
     @Transactional
     public TaskResponseDto createTask(TaskRequestDto dto) {
         User user = authenticatedUser.get();
-        Task task = new Task();
-        task.setTitle(dto.getTitle());
-        task.setContent(dto.getContent());
-        task.setCompleted(false);
-        task.setUser(user);
-        Task saved = repository.save(task);
-        return taskMapper.toResponseDto(saved);
+        return taskMapper.toResponseDto(repository.save(taskMapper.toEntity(dto, user)));
     }
 
     public List<TaskResponseDto> listAll() {
         Long userId = authenticatedUser.getId();
         List<Task> tasks = repository.findAllByUserIdOrderByIdAsc(userId);
-        return taskMapper.toResponseDtoList(tasks);
+        return tasks.stream()
+                .map(this::toResponseDtoWithImageUrls)
+                .toList();
     }
 
     public TaskResponseDto findById(Long id) {
         Long userId = authenticatedUser.getId();
-        Task task = findOwnedTask(id, userId);
-        return taskMapper.toResponseDto(task);
+        return toResponseDtoWithImageUrls(findOwnedTask(id, userId));
     }
 
     @Transactional
@@ -51,20 +47,22 @@ public class TaskService {
         Long userId = authenticatedUser.getId();
         Task task = findOwnedTask(id, userId);
         task.setCompleted(true);
-        Task saved = repository.save(task);
-        return taskMapper.toResponseDto(saved);
+        return toResponseDtoWithImageUrls(repository.save(task));
     }
 
     public List<TaskResponseDto> filterByStatus(boolean completed) {
         Long userId = authenticatedUser.getId();
         List<Task> tasks = repository.findAllByUserIdAndCompletedOrderByIdAsc(userId, completed);
-        return taskMapper.toResponseDtoList(tasks);
+        return tasks.stream()
+                .map(this::toResponseDtoWithImageUrls)
+                .toList();
     }
 
     @Transactional
     public void delete(Long id) {
         Long userId = authenticatedUser.getId();
         Task task = findOwnedTask(id, userId);
+        taskImageService.deleteImagesFromStorage(task.getImages());
         repository.delete(task);
     }
 
@@ -73,12 +71,21 @@ public class TaskService {
         Long userId = authenticatedUser.getId();
         Task task = findOwnedTask(id, userId);
         taskMapper.updateEntityFromDto(dto, task);
-        Task saved = repository.save(task);
-        return taskMapper.toResponseDto(saved);
+        return toResponseDtoWithImageUrls(repository.save(task));
     }
 
     private Task findOwnedTask(Long taskId, Long userId) {
         return repository.findByIdAndUserId(taskId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
     }
+
+    private TaskResponseDto toResponseDtoWithImageUrls(Task task) {
+        TaskResponseDto dto = taskMapper.toResponseDto(task);
+        dto.setImages(
+                taskImageService.toResponseDtoListWithPresignedUrls(task.getImages())
+        );
+
+        return dto;
+    }
+
 }

@@ -1,5 +1,7 @@
 package com.victorpolicarpo.task_manager.service;
 
+import com.victorpolicarpo.task_manager.dto.taskImage.TaskImageResponseDto;
+import com.victorpolicarpo.task_manager.exception.BadRequestException;
 import com.victorpolicarpo.task_manager.exception.ResourceNotFoundException;
 import com.victorpolicarpo.task_manager.mapper.TaskImageMapper;
 import com.victorpolicarpo.task_manager.model.Task;
@@ -14,9 +16,14 @@ import org.springframework.util.unit.DataSize;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -25,6 +32,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class TaskImageService {
     private final S3Client s3Client;
+    private final S3Presigner s3Presigner;
     private final TaskImageRepository taskImageRepository;
     private final TaskRepository taskRepository;
     private final TaskImageMapper taskImageMapper;
@@ -47,11 +55,11 @@ public class TaskImageService {
     @Transactional
     public void uploadImages(List<MultipartFile> file, Long id) throws IOException {
         Task task = taskRepository.findById(id).orElseThrow(
-                () -> new ResourceNotFoundException("Task with ID " + id + " does not exist")
+                () -> new ResourceNotFoundException("Task not found or not exists")
         );
         long currentImages = taskImageRepository.countByTaskId(id);
         if (currentImages + file.size() > maxImagePerTask){
-            throw new IllegalArgumentException("You can only upload " + maxImagePerTask + " images per task");
+            throw new BadRequestException("You can only upload " + maxImagePerTask + " images per task");
         }
 
         for (MultipartFile multipartFile : file) {
@@ -70,29 +78,85 @@ public class TaskImageService {
         }
     }
 
-    public String createImagePath(String contentType, Long taskId){
+    public List<TaskImageResponseDto> getTaskImages(Long taskId) {
+        if (!taskRepository.existsById(taskId)){
+            throw new ResourceNotFoundException("Task not found or not exists");
+        }
+        return toResponseDtoListWithPresignedUrls(taskImageRepository.findByTaskId(taskId));
+    }
+
+    @Transactional
+    public void deleteTaskImage(Long taskId, Long imageId) {
+        taskRepository.findById(taskId).orElseThrow(
+                        () -> new ResourceNotFoundException("Task not found or not exists")
+                );
+
+        TaskImage taskImage = taskImageRepository.findByIdAndTaskId(imageId, taskId).orElseThrow(
+                () -> new ResourceNotFoundException("Image not found or not exists")
+                );
+        deleteImagesFromStorage(List.of(taskImage));
+        taskImageRepository.delete(taskImage);
+    }
+
+    public List<TaskImageResponseDto> toResponseDtoListWithPresignedUrls(List<TaskImage> images){
+        return images.stream()
+                .map(image -> {
+                    TaskImageResponseDto dto = taskImageMapper.toResponseDto(image);
+                    String presignedUrl = generatePresignedUrl(image.getS3Key());
+                    dto.setUrl(presignedUrl);
+                    return dto;
+                })
+                .toList();
+    }
+
+    public void deleteImagesFromStorage(List<TaskImage> images) {
+        images.forEach(image ->
+                s3Client.deleteObject(
+                        DeleteObjectRequest.builder()
+                                .bucket(bucketName)
+                                .key(image.getS3Key())
+                                .build()
+                )
+        );
+    }
+
+    private String generatePresignedUrl(String s3Key){
+        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                .bucket(bucketName)
+                .key(s3Key)
+                .build();
+
+        GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
+                .signatureDuration(Duration.ofMinutes(30))
+                .getObjectRequest(getObjectRequest)
+                .build();
+
+        return s3Presigner.presignGetObject(presignRequest).url().toString();
+    }
+
+    private String createImagePath(String contentType, Long taskId){
         if (taskId == null){
-            throw new IllegalArgumentException("Task ID cannot be null");
+            throw new BadRequestException("Task ID cannot be null");
         }
 
         String extension = CONTENT_TYPE_EXTENSIONS.get(contentType);
         if (extension == null){
-            throw new IllegalArgumentException("File type is not supported");
+            throw new BadRequestException("File type is not supported");
         }
         return "task-images/" + taskId + "/" + UUID.randomUUID() + extension;
     }
 
-    public void validateFile(MultipartFile file){
+    private void validateFile(MultipartFile file){
         if (file.isEmpty()) {
-            throw new IllegalArgumentException("File is empty");
+            throw new BadRequestException("File is empty");
         }
 
         if (!CONTENT_TYPE_EXTENSIONS.containsKey(file.getContentType())) {
-            throw new IllegalArgumentException("File type is not supported");
+            throw new BadRequestException("File type is not supported");
         }
 
         if (file.getSize() > maxFileSize.toBytes()) {
-            throw new IllegalArgumentException("File size exceeds the maximum limit of " +maxFileSize);
+            throw new BadRequestException("File size exceeds the maximum limit of " +maxFileSize);
         }
     }
 }
