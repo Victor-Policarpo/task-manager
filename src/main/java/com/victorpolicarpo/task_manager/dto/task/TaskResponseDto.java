@@ -1,10 +1,13 @@
 package com.victorpolicarpo.task_manager.dto.task;
+import com.victorpolicarpo.task_manager.dto.taskImage.TaskImageResponseDto;
 import com.victorpolicarpo.task_manager.dto.user.UserMinDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -22,4 +25,6 @@ public class TaskResponseDto {
     private Boolean completed;
     @Schema(description = "The user DTO associated with the task.")
     private UserMinDto user;
+    @Schema(description = "The list of images associated with the task.")
+    List<TaskImageResponseDto> images;
 }

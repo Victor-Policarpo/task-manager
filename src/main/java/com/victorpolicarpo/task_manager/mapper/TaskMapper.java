@@ -10,7 +10,7 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import java.util.List;
 
-@Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+@Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE, uses = TaskImageMapper.class)
 public interface TaskMapper {
     TaskResponseDto toResponseDto(Task entity);
     void updateEntityFromDto(TaskUpdateDto taskUpdateDto, @MappingTarget Task entity);
