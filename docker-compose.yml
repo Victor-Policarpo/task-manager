@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:18
+    image: postgres:17
     container_name: taskmanager_postgres
     restart: always
     environment:
@@ -15,9 +15,7 @@ services:
         - taskmanager_network
 
   backend:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: victorpolicarpo2006/taskmanager:1.1
     container_name: taskmanager_backend
     restart: always
     environment:
@@ -26,8 +24,13 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - JWT_SECRET=${JWT_SECRET}
       - JWT_EXPIRATION=${JWT_EXPIRATION}
-    expose:
-      - "8080"
+      - DDL_AUTO=${DDL_AUTO}
+      - AWS_ACCESS_KEY=${AWS_ACCESS_KEY}
+      - AWS_SECRET_KEY=${AWS_SECRET_KEY}
+      - AWS_REGION=${AWS_REGION}
+      - AWS_BUCKET_NAME=${AWS_BUCKET_NAME}
+    ports:
+      - "8080:8080"
     depends_on:
       - postgres
     networks:
