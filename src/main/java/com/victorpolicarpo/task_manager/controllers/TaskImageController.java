@@ -1,5 +1,6 @@
 package com.victorpolicarpo.task_manager.controllers;
 
+import com.victorpolicarpo.task_manager.dto.taskImage.TaskImageResponseDto;
 import com.victorpolicarpo.task_manager.service.TaskImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,9 +19,19 @@ public class TaskImageController {
 
 
     @PostMapping("/{id}/images")
-    public ResponseEntity<?> uploadImages(@RequestParam("file") List<MultipartFile> file, @PathVariable Long id) throws IOException {
+    public ResponseEntity<Void> uploadImages(@RequestParam("file") List<MultipartFile> file, @PathVariable Long id) throws IOException {
         taskImageService.uploadImages(file, id);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    @GetMapping("/{id}/images")
+    public ResponseEntity<List<TaskImageResponseDto>> getTaskImages(@PathVariable Long id){
+        return ResponseEntity.status(HttpStatus.OK).body(taskImageService.getTaskImages(id));
+    }
+
+    @DeleteMapping("/{taskId}/images/{imageId}")
+    public ResponseEntity<Void> deleteTaskImage(@PathVariable Long taskId, @PathVariable Long imageId){
+        taskImageService.deleteTaskImage(taskId, imageId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
 }

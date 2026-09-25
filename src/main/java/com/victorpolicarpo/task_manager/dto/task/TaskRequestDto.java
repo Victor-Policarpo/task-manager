@@ -24,6 +24,4 @@ public class TaskRequestDto {
     @Size(min = 3, max = 5000, message = "The field must contain between 3 and 5000 characters.")
     @Schema(description = "The content of the task.", example = "Buy milk, bread, and eggs.")
     private String content;
-    @Schema(description = "The images of the task.")
-    List<TaskResponseDto> images;
 }
