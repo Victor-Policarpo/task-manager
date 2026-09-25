@@ -3,7 +3,6 @@ package com.victorpolicarpo.task_manager.security;
 import com.victorpolicarpo.task_manager.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
 
@@ -22,7 +22,8 @@ public class JwtService {
 
     @PostConstruct
     void initializeSigningKey() {
-        signingKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtProperties.getSecret()));
+        byte[] keyBytes = jwtProperties.getSecret().getBytes(StandardCharsets.UTF_8);
+        signingKey = Keys.hmacShaKeyFor(keyBytes);
     }
 
     public String generateToken(User user) {
